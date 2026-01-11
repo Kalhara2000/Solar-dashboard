@@ -12,14 +12,14 @@ import background from '../assets/solar-bg.jpg';
 export default function Register() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    name: '', email: '', password: '', confirmPassword: '', cedId: '', role: 'user'
+    name: '', email: '', password: '', confirmPassword: '', cebId: '', role: 'user'
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'cedId') {
+    if (name === 'cebId') {
       setForm(prev => ({ ...prev, [name]: value.toUpperCase() }));
     } else {
       setForm(prev => ({ ...prev, [name]: value }));
@@ -43,9 +43,10 @@ export default function Register() {
         name: form.name.trim(),
         email: form.email.trim(),
         password: form.password,
-        cedId: form.cedId.trim(),
+        cebId: form.cebId.trim(),
         role: form.role
       });
+
       toast.success('Registration successful! Please login.');
       navigate('/');
     } catch (err) {
@@ -73,7 +74,7 @@ export default function Register() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        overflow: 'hidden',
+        overflow: 'auto',
       }}
     >
       <Container maxWidth="sm">
@@ -131,7 +132,7 @@ export default function Register() {
             />
 
             <TextField
-              fullWidth label="CED ID" name="cedId" value={form.cedId}
+              fullWidth label="CED ID" name="cebId" value={form.cebId}
               onChange={handleChange} margin="normal" required
               inputProps={{ style: { textTransform: 'uppercase' } }}
               helperText="Will be uppercase"

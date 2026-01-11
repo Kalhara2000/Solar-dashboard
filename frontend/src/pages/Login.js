@@ -8,6 +8,10 @@ import api from '../services/api';
 
 import background from '../assets/solar-bg.jpg';
 
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
+
+
 export default function Login() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ cebId: '', password: '' });
@@ -23,37 +27,58 @@ export default function Login() {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
 
-    if (!form.cebId.trim()) {
-      setError('CEB ID is required');
-      setLoading(false);
-      return;
-    }
 
-    try {
-      const { data } = await api.post('/auth/login', {
-        cebId: form.cebId.trim(),
-        password: form.password
-      });
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('userRole', data.user.role);
-      localStorage.setItem('userCebId', data.user.cebId);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+  setLoading(true);
 
-      toast.success(`Welcome back, ${data.user.name || 'Officer'}!`);
-      navigate('/dashboard', { replace: true });
-    } catch (err) {
-      const msg = err.response?.data?.error || 'Invalid CEB ID or password';
-      setError(msg);
-      toast.error(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    // 1. Build fake email (MUST match backend)
+    const fakeEmail = `${form.cebId.toLowerCase()}@ceb.local`;
+
+    // 2. Sign in with Firebase
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      fakeEmail,
+      form.password
+    );
+
+    // 3. Get Firebase ID token
+    const idToken = await userCredential.user.getIdToken();
+
+    // 4. Send ID token to backend
+    const { data } = await api.post('/auth/login', { idToken });
+
+    // 5. Store JWT
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('userRole', data.user.role);
+    localStorage.setItem('userCebId', data.user.cebId);
+
+    toast.success(`Welcome back, ${data.user.name}!`);
+    navigate('/dashboard', { replace: true });
+
+  } catch (err) {
+    console.error(err);
+    const msg =
+      err.code === 'auth/wrong-password'
+        ? 'Invalid password'
+        : err.code === 'auth/user-not-found'
+        ? 'Invalid CEB ID'
+        : err.response?.data?.error || 'Login failed';
+
+    setError(msg);
+    toast.error(msg);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+
 
   return (
     <Box
@@ -71,7 +96,7 @@ export default function Login() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        overflow: 'hidden',
+        overflow: 'auto',
       }}
     >
       <Container maxWidth="xs">
