@@ -1,24 +1,44 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Home from './components/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import SolarUnits from './pages/SolarUnits';
+import AddSolarUnit from './pages/AddSolarUnit';
+
+function ProtectedLayout() {
+  const isAuthenticated = !!localStorage.getItem('token');
+
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  return (
+    <>
+      <Navbar />
+      <Outlet />
+    </>
+  );
+}
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        <Route element={<ProtectedLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/solar-units" element={<SolarUnits />} />
+          <Route path="/add-solar" element={<AddSolarUnit />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
