@@ -22,7 +22,7 @@ export default function Home() {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
+    overflow: 'auto',
   }}
 >
   {/* Glass card */}
