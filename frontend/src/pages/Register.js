@@ -72,10 +72,9 @@ export default function Register() {
         backgroundPosition: 'center',
         backgroundAttachment: { xs: 'scroll', md: 'fixed' },
         display: 'flex',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         justifyContent: 'center',
         overflow: 'auto',
-
       }}
     >
       <Container maxWidth="sm">

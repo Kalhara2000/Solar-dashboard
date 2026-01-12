@@ -20,7 +20,7 @@ export default function Home() {
     backgroundPosition: 'center',
     backgroundAttachment: { xs: 'scroll', md: 'fixed' },
     display: 'flex',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     justifyContent: 'center',
     overflow: 'auto',
   }}

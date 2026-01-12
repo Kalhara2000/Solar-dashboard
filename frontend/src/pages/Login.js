@@ -92,9 +92,9 @@ const handleSubmit = async (e) => {
         backgroundImage: `linear-gradient(rgba(0,0,0,0.68), rgba(0,0,0,0.78)), url(${background})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundAttachment: { xs: 'scroll', md: 'fixed' },
+        backgroundAttachment: 'fixed',
         display: 'flex',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         justifyContent: 'center',
         overflow: 'auto',
       }}
