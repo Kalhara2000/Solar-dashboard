@@ -1,89 +1,77 @@
 import { useState } from 'react';
 import {
-  Box, Button, TextField, Typography, Container, CircularProgress, Alert
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Container,
+  Alert,
+  CircularProgress,
+  useMediaQuery
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
 import api from '../services/api';
 
 import background from '../assets/solar-bg.jpg';
 
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase';
-
-
 export default function Login() {
   const navigate = useNavigate();
+  const isMobile = useMediaQuery('(max-width:600px)');
+
   const [form, setForm] = useState({ cebId: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Automatically convert CEB ID to UPPERCASE
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      [name]: name === 'cebId' ? value.toUpperCase() : value
+      [name]: name === 'cebId' ? value.toUpperCase() : value,
     }));
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
+    try {
+      const fakeEmail = `${form.cebId.toLowerCase().trim()}@ceb.local`;
 
+      // Firebase login
+      const userCredential = await signInWithEmailAndPassword(auth, fakeEmail, form.password);
+      const idToken = await userCredential.user.getIdToken();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError('');
-  setLoading(true);
+      // Send ID token to backend
+      const { data } = await api.post('/auth/login', { idToken });
 
-  try {
-    // 1. Build fake email (MUST match backend)
-    const fakeEmail = `${form.cebId.toLowerCase()}@ceb.local`;
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userRole', data.user.role);
+      localStorage.setItem('userCebId', data.user.cebId);
 
-    // 2. Sign in with Firebase
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      fakeEmail,
-      form.password
-    );
+      toast.success(`Welcome back, ${data.user.name || 'Officer'}!`);
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      console.error(err);
+      let msg = 'Login failed';
+      if (err.code === 'auth/wrong-password') msg = 'Invalid password';
+      if (err.code === 'auth/user-not-found') msg = 'Invalid CEB ID';
+      if (err.response?.data?.error) msg = err.response.data.error;
 
-    // 3. Get Firebase ID token
-    const idToken = await userCredential.user.getIdToken();
-
-    // 4. Send ID token to backend
-    const { data } = await api.post('/auth/login', { idToken });
-
-    // 5. Store JWT
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('userRole', data.user.role);
-    localStorage.setItem('userCebId', data.user.cebId);
-
-    toast.success(`Welcome back, ${data.user.name}!`);
-    navigate('/dashboard', { replace: true });
-
-  } catch (err) {
-    console.error(err);
-    const msg =
-      err.code === 'auth/wrong-password'
-        ? 'Invalid password'
-        : err.code === 'auth/user-not-found'
-        ? 'Invalid CEB ID'
-        : err.response?.data?.error || 'Login failed';
-
-    setError(msg);
-    toast.error(msg);
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-
-
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Box
       sx={{
-        minHeight: '100vh',
+        minHeight: '100dvh',
         width: '100vw',
         margin: 0,
         padding: 0,
@@ -99,34 +87,51 @@ const handleSubmit = async (e) => {
         overflow: 'auto',
       }}
     >
-      <Container maxWidth="xs">
+      <Container maxWidth="xs" sx={{ px: isMobile ? 2 : 3, py: isMobile ? 2 : 4 }}>
         <Box
           sx={{
             bgcolor: 'rgba(255, 255, 255, 0.07)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
-            borderRadius: 5,
-            p: { xs: 4, sm: 5 },
+            borderRadius: isMobile ? 4 : 5,
+            p: isMobile ? 3 : 5,
             textAlign: 'center',
             boxShadow: '0 20px 60px rgba(0,0,0,0.55)',
+            maxWidth: '100%',
+            mx: 'auto',
           }}
         >
           <Typography
-            variant="h4"
+            variant={isMobile ? 'h5' : 'h4'}
             fontWeight={800}
             color="white"
             gutterBottom
-            sx={{ mb: 1, textShadow: '2px 2px 10px rgba(0,0,0,0.8)' }}
+            sx={{
+              mb: isMobile ? 1 : 1.5,
+              textShadow: '2px 2px 10px rgba(0,0,0,0.8)',
+            }}
           >
             CEB Solar Management
           </Typography>
 
-          <Typography variant="subtitle1" color="rgba(255,255,255,0.85)" sx={{ mb: 4 }}>
+          <Typography
+            variant={isMobile ? 'body1' : 'subtitle1'}
+            color="rgba(255,255,255,0.85)"
+            sx={{ mb: isMobile ? 3 : 4 }}
+          >
             Officer / Admin Login
           </Typography>
 
           {error && (
-            <Alert severity="error" sx={{ mb: 3, bgcolor: 'rgba(239,68,68,0.15)', color: 'white' }}>
+            <Alert
+              severity="error"
+              sx={{
+                mb: isMobile ? 2 : 3,
+                bgcolor: 'rgba(239,68,68,0.15)',
+                color: 'white',
+                fontSize: isMobile ? '0.85rem' : '1rem',
+              }}
+            >
               {error}
             </Alert>
           )}
@@ -148,10 +153,11 @@ const handleSubmit = async (e) => {
               InputProps={{
                 style: { color: 'white' },
                 sx: {
+                  fontSize: isMobile ? '0.9rem' : '1rem',
                   '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.4)' },
                   '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#42a5f5' },
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#1976d2' },
-                }
+                },
               }}
             />
 
@@ -169,23 +175,24 @@ const handleSubmit = async (e) => {
               InputProps={{
                 style: { color: 'white' },
                 sx: {
+                  fontSize: isMobile ? '0.9rem' : '1rem',
                   '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.4)' },
                   '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#42a5f5' },
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#1976d2' },
-                }
+                },
               }}
             />
 
             <Button
               fullWidth
               variant="contained"
-              size="large"
+              size={isMobile ? 'medium' : 'large'}
               type="submit"
               disabled={loading}
               sx={{
-                mt: 3,
-                py: 1.6,
-                fontSize: '1.1rem',
+                mt: isMobile ? 3 : 4,
+                py: isMobile ? 1.4 : 1.6,
+                fontSize: isMobile ? '1rem' : '1.1rem',
                 fontWeight: 600,
                 borderRadius: 3,
                 background: 'linear-gradient(45deg, #1e3a8a 0%, #1976d2 100%)',
@@ -199,13 +206,17 @@ const handleSubmit = async (e) => {
                 transition: 'all 0.3s ease',
               }}
             >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
+              {loading ? <CircularProgress size={isMobile ? 20 : 24} color="inherit" /> : 'Login'}
             </Button>
 
             <Button
               fullWidth
               color="inherit"
-              sx={{ mt: 2, color: 'rgba(255,255,255,0.85)' }}
+              sx={{
+                mt: isMobile ? 1.5 : 2,
+                color: 'rgba(255,255,255,0.85)',
+                fontSize: isMobile ? '0.9rem' : '1rem',
+              }}
               onClick={() => navigate('/register')}
             >
               Don't have CEB ID access? Register

@@ -16,6 +16,7 @@ const StatCard = ({ icon: Icon, title, value, color }) => (
       alignItems: 'center',
       textAlign: 'center',
       transition: 'transform 0.2s',
+      backgroundColor: "yellowgreen",
       '&:hover': { transform: 'translateY(-8px)' }
     }}
   >
@@ -58,7 +59,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh'}}>
         <CircularProgress size={60} />
       </Box>
     );
@@ -70,8 +71,15 @@ export default function Dashboard() {
         CEB Solar Management Dashboard
       </Typography>
 
-      <Grid container spacing={4} sx={{ mt: 2 }}>
-        <Grid item xs={12} sm={6} md={3}>
+      <Grid
+        container
+        spacing={4}
+        sx={{ mt: 2 }}
+        justifyContent="center"
+        alignItems="center"
+      >
+
+        <Grid item xs={12} sm={6} md={3} sx={{ pt: 2 }}>
           <StatCard
             icon={SolarPowerIcon}
             title="Total Units"
@@ -80,7 +88,8 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+
+        <Grid item xs={12} sm={6} md={3} sx={{ pt: 2 }}>
           <StatCard
             icon={PowerSettingsNewIcon}
             title="Active Units"
@@ -89,7 +98,7 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={3} sx={{ pt: 2 }}>
           <StatCard
             icon={ElectricBoltIcon}
             title="Total Power"
@@ -98,7 +107,7 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={3} sx={{ pt: 2 }}>
           <StatCard
             icon={ElectricBoltIcon}
             title="Est. Generation"
