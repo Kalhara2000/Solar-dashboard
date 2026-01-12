@@ -61,7 +61,7 @@ export default function Register() {
   return (
     <Box
       sx={{
-        height: '100vh',
+        minHeight: '100vh',
         width: '100vw',
         margin: 0,
         padding: 0,
@@ -70,11 +70,12 @@ export default function Register() {
         backgroundImage: `linear-gradient(rgba(0,0,0,0.68), rgba(0,0,0,0.78)), url(${background})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
+        backgroundAttachment: { xs: 'scroll', md: 'fixed' },
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
         overflow: 'auto',
+
       }}
     >
       <Container maxWidth="sm">
