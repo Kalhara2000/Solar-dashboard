@@ -1,8 +1,15 @@
 import { useState } from 'react';
 import {
-  Container, Typography, TextField, Button, Alert, Box, CircularProgress
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Container,
+  Alert,
+  CircularProgress,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import api from '../services/api';
 
 export default function AddSolarUnit() {
@@ -11,119 +18,126 @@ export default function AddSolarUnit() {
   const [formData, setFormData] = useState({
     unitId: '',
     location: '',
-    capacity: '',      // kW - optional
-    description: ''    // optional
+    capacity: '',
+    description: '',
   });
 
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === 'unitId' ? value.toUpperCase() : value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess(false);
-    setLoading(true);
 
-    if (!formData.unitId.trim() || !formData.location.trim()) {
-      setError('Unit ID and Location are required');
-      setLoading(false);
+    if (!formData.unitId || !formData.location) {
+      toast.error('Unit ID and Location are required');
       return;
     }
 
-    try {
-      await api.post('/solar/add', {
-        unitId: formData.unitId.trim().toUpperCase(),
-        location: formData.location.trim(),
-        capacity: formData.capacity ? Number(formData.capacity) : undefined,
-        description: formData.description.trim() || undefined
-      });
+    setLoading(true);
 
+    try {
+      await api.post('/solar-units', formData);
+      toast.success('Solar unit added successfully');
       setSuccess(true);
-      setTimeout(() => {
-        navigate('/solar-units');
-      }, 1500);
+
+      setTimeout(() => navigate('/solar-units'), 1500);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to add solar unit');
+      const msg = err.response?.data?.error || 'Failed to add solar unit';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Container maxWidth="sm" sx={{ py: 6 }}>
-      <Typography variant="h5" gutterBottom fontWeight={600}>
-        Add New Solar Unit
-      </Typography>
-
-      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
-      {success && (
-        <Alert severity="success" sx={{ mb: 3 }}>
-          Solar unit added successfully! Redirecting...
-        </Alert>
-      )}
-
-      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-        <TextField
-          fullWidth
-          label="Unit ID"
-          name="unitId"
-          margin="normal"
-          value={formData.unitId}
-          onChange={handleChange}
-          required
-          helperText="Will be converted to uppercase"
-          inputProps={{ style: { textTransform: 'uppercase' } }}
-        />
-
-        <TextField
-          fullWidth
-          label="Location / Site Name"
-          name="location"
-          margin="normal"
-          value={formData.location}
-          onChange={handleChange}
-          required
-        />
-
-        <TextField
-          fullWidth
-          label="Installed Capacity (kW)"
-          name="capacity"
-          type="number"
-          margin="normal"
-          value={formData.capacity}
-          onChange={handleChange}
-          helperText="Optional - Installed capacity in kilowatts"
-        />
-
-        <TextField
-          fullWidth
-          label="Description / Notes"
-          name="description"
-          margin="normal"
-          multiline
-          rows={3}
-          value={formData.description}
-          onChange={handleChange}
-        />
-
-        <Button
-          fullWidth
-          variant="contained"
-          size="large"
-          type="submit"
-          disabled={loading}
-          sx={{ mt: 4, py: 1.5 }}
+    <Box sx={{ minHeight: '100vh', py: 6 }}>
+      <Container maxWidth="sm">
+        <Box
+          sx={{
+            bgcolor: 'background.paper',
+            p: 4,
+            borderRadius: 2,
+            boxShadow: 3,
+          }}
         >
-          {loading ? <CircularProgress size={24} color="inherit" /> : 'Add Solar Unit'}
-        </Button>
-      </Box>
-    </Container>
+          <Typography variant="h4" mb={2}>
+            Add Solar Unit
+          </Typography>
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+          {success && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              Redirecting...
+            </Alert>
+          )}
+
+          <Box component="form" onSubmit={handleSubmit}>
+            <TextField
+              fullWidth
+              label="Unit ID"
+              name="unitId"
+              value={formData.unitId}
+              onChange={handleChange}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Location"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Capacity (kW)"
+              name="capacity"
+              type="number"
+              value={formData.capacity}
+              onChange={handleChange}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              margin="normal"
+              multiline
+              rows={3}
+            />
+
+            <Button
+              fullWidth
+              type="submit"
+              variant="contained"
+              disabled={loading}
+              sx={{ mt: 3 }}
+            >
+              {loading ? <CircularProgress size={22} /> : 'Add Solar Unit'}
+            </Button>
+          </Box>
+        </Box>
+      </Container>
+    </Box>
   );
 }
