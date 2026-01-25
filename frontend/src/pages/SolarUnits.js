@@ -83,6 +83,34 @@ export default function SolarUnits() {
     );
   }
 
+
+
+  const toggleSelectedUnits = async () => {
+    try {
+      const selectedUnits = units.filter((u) => selected.includes(u.unitId));
+      const newStatus = selectedUnits.some((u) => !u.status); // ON if any is OFF
+
+      await Promise.all(
+        selected.map((unitId) =>
+          api.patch(`/solar-units/${unitId}/status`, { status: newStatus })
+        )
+      );
+
+      setUnits((prev) =>
+        prev.map((u) =>
+          selected.includes(u.unitId) ? { ...u, status: newStatus } : u
+        )
+      );
+
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to update selected units');
+    }
+  };
+
+
+
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Typography variant="h5" gutterBottom fontWeight={600}>
@@ -113,8 +141,17 @@ export default function SolarUnits() {
                   indeterminate={selected.length > 0 && selected.length < units.length}
                   checked={units.length > 0 && selected.length === units.length}
                   onChange={(e) => handleSelectAll(e.target.checked)}
-                  sx={{ color: 'white' }}
+                  sx={{
+                    color: 'white',               // unchecked box
+                    '&.Mui-checked': {
+                      color: 'white',             // checked tick
+                    },
+                    '&.MuiCheckbox-indeterminate': {
+                      color: 'white',             // indeterminate dash
+                    },
+                  }}
                 />
+
               </TableCell>
               <TableCell sx={{ color: 'white' }}>Unit ID</TableCell>
               <TableCell sx={{ color: 'white' }}>Location</TableCell>
@@ -176,9 +213,16 @@ export default function SolarUnits() {
 
       {selected.length > 0 && (
         <Box sx={{ mt: 3 }}>
-          <Button variant="contained">Selected: {selected.length} units</Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={toggleSelectedUnits}
+          >
+            Unit Status NO/OFF ({selected.length})
+          </Button>
         </Box>
       )}
+
     </Container>
   );
 }
