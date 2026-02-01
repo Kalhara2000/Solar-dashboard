@@ -1,6 +1,4 @@
-//AddSolarUnit.js
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -10,11 +8,12 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import api from '../services/api';
 
-export default function AddSolarUnit() {
+export default function EditSolarUnit() {
+  const { unitId } = useParams(); // From URL: /edit-solar/:unitId
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -24,9 +23,34 @@ export default function AddSolarUnit() {
     description: '',
   });
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    const fetchUnit = async () => {
+      try {
+        const { data } = await api.get(`/solar-units/${unitId}`);
+        if (!data) throw new Error('Unit not found');
+
+        setFormData({
+          unitId: data.unitId || unitId,
+          location: data.location || '',
+          capacity: data.capacity || '',
+          description: data.description || '',
+        });
+      } catch (err) {
+        const msg = err.response?.data?.error || 'Failed to load solar unit';
+        setError(msg);
+        toast.error(msg);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUnit();
+  }, [unitId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -41,27 +65,43 @@ export default function AddSolarUnit() {
     setError('');
     setSuccess(false);
 
-    if (!formData.unitId || !formData.location) {
-      toast.error('Unit ID and Location are required');
+    if (!formData.location.trim()) {
+      toast.error('Location is required');
+      setError('Location is required');
       return;
     }
 
-    setLoading(true);
+    setSaving(true);
 
     try {
-      await api.post('/solar-units', formData);
-      toast.success('Solar unit added successfully');
+      const cleanUnitId = formData.unitId.trim().toUpperCase();
+
+      await api.patch(`/solar-units/${cleanUnitId}`, {
+        location: formData.location.trim(),
+        capacity: formData.capacity ? Number(formData.capacity) : null,
+        description: formData.description.trim(),
+      });
+
+      toast.success('Solar unit updated successfully');
       setSuccess(true);
 
       setTimeout(() => navigate('/solar-units'), 1500);
     } catch (err) {
-      const msg = err.response?.data?.error || 'Failed to add solar unit';
+      const msg = err.response?.data?.error || 'Failed to update solar unit';
       setError(msg);
       toast.error(msg);
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <Box sx={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ minHeight: '100vh', py: 6 }}>
@@ -75,7 +115,7 @@ export default function AddSolarUnit() {
           }}
         >
           <Typography variant="h4" mb={2}>
-            Add Solar Unit
+            Edit Solar Unit
           </Typography>
 
           {error && (
@@ -98,6 +138,8 @@ export default function AddSolarUnit() {
               onChange={handleChange}
               margin="normal"
               required
+              disabled // Cannot change ID after creation
+              helperText="Unit ID cannot be changed"
             />
             <TextField
               fullWidth
@@ -132,10 +174,20 @@ export default function AddSolarUnit() {
               fullWidth
               type="submit"
               variant="contained"
-              disabled={loading}
+              disabled={saving}
               sx={{ mt: 3 }}
             >
-              {loading ? <CircularProgress size={22} /> : 'Add Solar Unit'}
+              {saving ? <CircularProgress size={22} /> : 'Update Solar Unit'}
+            </Button>
+
+            <Button
+              fullWidth
+              variant="outlined"
+              color="inherit"
+              onClick={() => navigate('/solar-units')}
+              sx={{ mt: 2 }}
+            >
+              Cancel & Go Back
             </Button>
           </Box>
         </Box>

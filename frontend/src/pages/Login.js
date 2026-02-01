@@ -1,3 +1,5 @@
+//login.js
+
 import { useState } from 'react';
 import {
   Box,
@@ -51,6 +53,8 @@ export default function Login() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('userRole', data.user.role);
       localStorage.setItem('userCebId', data.user.cebId);
+      localStorage.setItem('userUid', data.user.uid);
+
 
       toast.success(`Welcome back, ${data.user.name || 'Officer'}!`);
       navigate('/dashboard', { replace: true });
