@@ -45,7 +45,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const { data } = await api.get('/solar-units/stats'); // /api/solar-units/stats
+        const { data } = await api.get('/solar-units/status'); // /api/solar-units/stats
         setStats({
           totalUnits: data.totalUnits || 0,
           activeUnits: data.activeUnits || 0,

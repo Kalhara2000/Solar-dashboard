@@ -6,6 +6,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import SolarUnits from './pages/SolarUnits';
 import AddSolarUnit from './pages/AddSolarUnit';
+import EditSolarUnit from './pages/EditSolarUnit';
 
 function ProtectedLayout() {
   const isAuthenticated = !!localStorage.getItem('token');
@@ -34,6 +35,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/solar-units" element={<SolarUnits />} />
           <Route path="/add-solar" element={<AddSolarUnit />} />
+          <Route path="/edit-solar/:unitId" element={<EditSolarUnit />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
