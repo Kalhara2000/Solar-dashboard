@@ -38,6 +38,13 @@ export default function SolarUnits() {
   const userCebId = localStorage.getItem('userCebId');
   const isMobile = useMediaQuery('(max-width:600px)');
 
+
+
+    const openDashboard = (unitId) => {
+      navigate(`/solar-unit/${unitId}`);
+    };
+
+
   const loadUnits = useCallback(async () => {
     try {
       setLoading(true);
@@ -154,6 +161,7 @@ export default function SolarUnits() {
       </Box>
     );
   }
+
 
   return (
     <Container maxWidth="xl" sx={{ py: { xs: 3, sm: 4 } }}>
@@ -283,6 +291,12 @@ export default function SolarUnits() {
                       )}
                     </TableCell>
                   )}
+
+                  <TableCell sx={{ fontSize: { xs: '0.85rem', sm: '1rem' } }}>
+                    <Button onClick={() => openDashboard(unit.unitId)}>
+                      View Dashboard
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))
             ) : (

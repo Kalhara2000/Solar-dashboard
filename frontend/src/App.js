@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import SolarUnits from './pages/SolarUnits';
+import SolarUnitDashboard from "./pages/SolarUnitDashboard";
 import AddSolarUnit from './pages/AddSolarUnit';
 import EditSolarUnit from './pages/EditSolarUnit';
 
@@ -34,6 +35,7 @@ function App() {
         <Route element={<ProtectedLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/solar-units" element={<SolarUnits />} />
+          <Route path="/solar-unit/:unitId" element={<SolarUnitDashboard />} />
           <Route path="/add-solar" element={<AddSolarUnit />} />
           <Route path="/edit-solar/:unitId" element={<EditSolarUnit />} />
         </Route>
