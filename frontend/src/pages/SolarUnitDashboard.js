@@ -72,10 +72,13 @@ export default function SolarUnitDashboard() {
   return (
     <Container maxWidth="xl" sx={{ py: { xs: 3, sm: 4 } }}>
       {/* Back Button */}
-      <Box mb={3}>
-        <Button variant="contained" color="primary" onClick={() => navigate(-1)}>
+      <Box mb={3} display="flex" alignItems="center">
+        <Button variant="contained" color="warning" onClick={() => navigate(-1)}>
           Back
         </Button>
+        <Typography variant="h5" sx={{ flex: 1, textAlign: 'center' }}>
+          Unit ID: {unit.unitId}
+        </Typography>
       </Box>
 
       <Grid container spacing={3} sx={{ p: 4 }}>
