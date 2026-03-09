@@ -232,7 +232,7 @@ export default function SolarUnits() {
           <TableBody>
             {filteredUnits.length > 0 ? (
               filteredUnits.map((unit) => (
-                <TableRow key={unit.unitId} hover onClick={() => openDashboard(unit.unitId)}>
+                <TableRow key={unit.unitId} hover>
                   {['officer', 'admin'].includes(userRole) && (
                     <TableCell padding="checkbox">
                       <Checkbox
@@ -241,19 +241,19 @@ export default function SolarUnits() {
                       />
                     </TableCell>
                   )}
-                  <TableCell sx={{ fontSize: { xs: '0.85rem', sm: '1rem' } }}>
+                  <TableCell sx={{ fontSize: { xs: '0.85rem', sm: '1rem' } }} onClick={() => openDashboard(unit.unitId)}>
                     {unit.unitId}
                   </TableCell>
-                  <TableCell sx={{ fontSize: { xs: '0.85rem', sm: '1rem' } }}>
+                  <TableCell sx={{ fontSize: { xs: '0.85rem', sm: '1rem' } }} onClick={() => openDashboard(unit.unitId)}>
                     {unit.location || '-'}
                   </TableCell>
-                  <TableCell align="right" sx={{ fontSize: { xs: '0.85rem', sm: '1rem' } }}>
+                  <TableCell align="right" sx={{ fontSize: { xs: '0.85rem', sm: '1rem' } }} onClick={() => openDashboard(unit.unitId)}>
                     {unit.voltage != null ? unit.voltage.toFixed(1) : '-'}
                   </TableCell>
-                  <TableCell align="right" sx={{ fontSize: { xs: '0.85rem', sm: '1rem' } }}>
+                  <TableCell align="right" sx={{ fontSize: { xs: '0.85rem', sm: '1rem' } }} onClick={() => openDashboard(unit.unitId)}>
                     {unit.current != null ? unit.current.toFixed(2) : '-'}
                   </TableCell>
-                  <TableCell align="right" sx={{ fontSize: { xs: '0.85rem', sm: '1rem' } }}>
+                  <TableCell align="right" sx={{ fontSize: { xs: '0.85rem', sm: '1rem' } }} onClick={() => openDashboard(unit.unitId)}>
                     {unit.power != null ? unit.power.toFixed(0) : '-'}
                   </TableCell>
                   <TableCell align="center">
