@@ -232,7 +232,7 @@ export default function SolarUnits() {
           <TableBody>
             {filteredUnits.length > 0 ? (
               filteredUnits.map((unit) => (
-                <TableRow key={unit.unitId} hover>
+                <TableRow key={unit.unitId} hover onClick={() => openDashboard(unit.unitId)}>
                   {['officer', 'admin'].includes(userRole) && (
                     <TableCell padding="checkbox">
                       <Checkbox
@@ -291,12 +291,6 @@ export default function SolarUnits() {
                       )}
                     </TableCell>
                   )}
-
-                  <TableCell sx={{ fontSize: { xs: '0.85rem', sm: '1rem' } }}>
-                    <Button onClick={() => openDashboard(unit.unitId)}>
-                      View Dashboard
-                    </Button>
-                  </TableCell>
                 </TableRow>
               ))
             ) : (

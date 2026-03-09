@@ -31,7 +31,7 @@ export default function Register() {
     password: '',
     confirmPassword: '',
     cebId: '',
-    role: 'user'
+    role: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -247,7 +247,7 @@ export default function Register() {
               >
                 <MenuItem value="admin">Admin</MenuItem>
                 <MenuItem value="officer">Officer</MenuItem>
-                <MenuItem value="user">User</MenuItem>
+                <MenuItem value="user" disabled>User</MenuItem>
               </Select>
             </FormControl>
 
