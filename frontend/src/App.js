@@ -8,6 +8,17 @@ import SolarUnits from './pages/SolarUnits';
 import SolarUnitDashboard from "./pages/SolarUnitDashboard";
 import AddSolarUnit from './pages/AddSolarUnit';
 import EditSolarUnit from './pages/EditSolarUnit';
+import UserManagement from './pages/UserManagement';
+
+// Admin-only wrapper
+function ProtectedAdmin({ children }) {
+  const userRole = localStorage.getItem('userRole');
+  if (userRole !== 'admin') {
+    // Redirect non-admin users to dashboard
+    return <Navigate to="/dashboard" replace />;
+  }
+  return children;
+}
 
 function ProtectedLayout() {
   const isAuthenticated = !!localStorage.getItem('token');
@@ -28,18 +39,31 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
+        {/* Protected Routes */}
         <Route element={<ProtectedLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/solar-units" element={<SolarUnits />} />
           <Route path="/solar-unit/:unitId" element={<SolarUnitDashboard />} />
           <Route path="/add-solar" element={<AddSolarUnit />} />
           <Route path="/edit-solar/:unitId" element={<EditSolarUnit />} />
+
+          {/* Admin-only route */}
+          <Route
+            path="/user-management"
+            element={
+              <ProtectedAdmin>
+                <UserManagement />
+              </ProtectedAdmin>
+            }
+          />
         </Route>
 
+        {/* Redirect unknown routes */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

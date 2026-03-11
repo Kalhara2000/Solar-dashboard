@@ -141,6 +141,9 @@ export default function EditSolarUnit() {
               disabled // Cannot change ID after creation
               helperText="Unit ID cannot be changed"
             />
+            {/* <Typography variant="h6" mb={2}>
+              Unit ID: {formData.unitId}
+            </Typography> */}
             <TextField
               fullWidth
               label="Location"

@@ -19,12 +19,20 @@ import {
   IconButton,
   Tooltip,
   useMediaQuery,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from '@mui/material';
+
+
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import api from '../services/api';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+
 
 export default function SolarUnits() {
   const [units, setUnits] = useState([]);
@@ -33,6 +41,10 @@ export default function SolarUnits() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [unitToDelete, setUnitToDelete] = useState(null);
+
   const navigate = useNavigate();
   const userRole = localStorage.getItem('userRole');
   const userCebId = localStorage.getItem('userCebId');
@@ -40,9 +52,9 @@ export default function SolarUnits() {
 
 
 
-    const openDashboard = (unitId) => {
-      navigate(`/solar-unit/${unitId}`);
-    };
+  const openDashboard = (unitId) => {
+    navigate(`/solar-unit/${unitId}`);
+  };
 
 
   const loadUnits = useCallback(async () => {
@@ -92,17 +104,28 @@ export default function SolarUnits() {
     }
   };
 
-  const handleDelete = async (unitId) => {
-    if (!window.confirm('Are you sure you want to delete this solar unit?')) return;
+  const handleDelete = (unitId) => {
+    setUnitToDelete(unitId);
+    setDeleteDialogOpen(true);
+  };
 
+
+  const confirmDelete = async () => {
     try {
-      await api.delete(`/solar-units/${unitId}`);
-      setUnits((prev) => prev.filter((u) => u.unitId !== unitId));
+      await api.delete(`/solar-units/${unitToDelete}`);
+      setUnits((prev) => prev.filter((u) => u.unitId !== unitToDelete));
       toast.success('Solar unit deleted successfully');
     } catch (err) {
       toast.error('Failed to delete unit');
     }
+
+    setDeleteDialogOpen(false);
+    setUnitToDelete(null);
   };
+
+
+
+
 
   const handleEdit = (unit) => {
     navigate(`/edit-solar/${unit.unitId}`);
@@ -165,6 +188,33 @@ export default function SolarUnits() {
 
   return (
     <Container maxWidth="xl" sx={{ py: { xs: 3, sm: 4 } }}>
+
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      >
+        <DialogTitle>Delete Solar Unit</DialogTitle>
+
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this solar unit? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)} color="primary">
+            Cancel
+          </Button>
+
+          <Button onClick={confirmDelete} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
+
+
       <Typography
         variant={isMobile ? 'h6' : 'h5'}
         gutterBottom
@@ -322,5 +372,7 @@ export default function SolarUnits() {
         </Box>
       )}
     </Container>
+
+
   );
 }

@@ -31,6 +31,8 @@ export default function Navbar() {
     setAnchorEl(null);
   };
 
+  const userRole = localStorage.getItem('userRole'); // get role from localStorage
+
   return (
     <AppBar position="static" elevation={0} sx={{ borderBottom: '1px solid #e0e0e0ff' }}>
       <Toolbar sx={{ px: { xs: 2, md: 4 } }}>
@@ -40,23 +42,17 @@ export default function Navbar() {
             mr: 1.5,
             fontSize: 32,
             color: 'white',
-            '&:hover': {
-              color: 'yellow',
-            },
+            '&:hover': { color: 'yellow' },
           }}
         />
 
-        <Typography
-          variant="h6"
-          component="div"
-          sx={{ flexGrow: 1, fontWeight: 600 }}
-        >
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 600 }}>
           CEB Solar
         </Typography>
 
         {/* Desktop Menu */}
         <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
-          <Button color="inheri" component={RouterLink} to="/dashboard">
+          <Button color="inherit" component={RouterLink} to="/dashboard">
             Dashboard
           </Button>
           <Button color="inherit" component={RouterLink} to="/solar-units">
@@ -66,10 +62,16 @@ export default function Navbar() {
             Add Unit
           </Button>
 
+          {/* Show User Management only for admin */}
+          {userRole === 'admin' && (
+            <Button color="inherit" component={RouterLink} to="/user-management">
+              User Management
+            </Button>
+          )}
+
           <IconButton onClick={handleLogout} sx={{ color: 'error.main' }}>
             <LogoutIcon />
           </IconButton>
-
         </Box>
 
         {/* Mobile Menu Button */}
@@ -98,6 +100,14 @@ export default function Navbar() {
           <MenuItem component={RouterLink} to="/add-solar" onClick={handleMenuClose}>
             Add Unit
           </MenuItem>
+
+          {/* Mobile: User Management only for admin */}
+          {userRole === 'admin' && (
+            <MenuItem component={RouterLink} to="/user-management" onClick={handleMenuClose}>
+              User Management
+            </MenuItem>
+          )}
+
           <MenuItem
             onClick={() => {
               handleMenuClose();
@@ -105,14 +115,11 @@ export default function Navbar() {
             }}
             sx={{
               color: 'red',
-              '&:hover': {
-                backgroundColor: 'rgba(255,0,0,0.1)', // light red hover
-              },
+              '&:hover': { backgroundColor: 'rgba(255,0,0,0.1)' },
             }}
           >
             Logout
           </MenuItem>
-
         </Menu>
       </Toolbar>
     </AppBar>
