@@ -9,6 +9,7 @@ import SolarUnitDashboard from "./pages/SolarUnitDashboard";
 import AddSolarUnit from './pages/AddSolarUnit';
 import EditSolarUnit from './pages/EditSolarUnit';
 import UserManagement from './pages/UserManagement';
+import EditUser from "./pages/EditUser";
 
 // Admin-only wrapper
 function ProtectedAdmin({ children }) {
@@ -62,6 +63,7 @@ function App() {
             }
           />
         </Route>
+        <Route path="/edit-user/:uid" element={<EditUser />} />
 
         {/* Redirect unknown routes */}
         <Route path="*" element={<Navigate to="/" replace />} />
