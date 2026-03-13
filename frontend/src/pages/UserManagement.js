@@ -24,10 +24,13 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Chip,
 } from "@mui/material";
 
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+// import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+// import CancelIcon from "@mui/icons-material/Cancel";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
@@ -37,7 +40,6 @@ export default function UserManagement() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
 
@@ -61,10 +63,14 @@ export default function UserManagement() {
   const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
-
       const { data } = await api.get("/users");
-
-      setUsers(data || []);
+      
+      // Sort users by creation date (newest first)
+      const sortedUsers = (data || []).sort((a, b) => {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+      
+      setUsers(sortedUsers);
       setError(null);
     } catch (err) {
       console.error("Failed to load users:", err);
@@ -90,17 +96,15 @@ export default function UserManagement() {
   const confirmDelete = async () => {
     try {
       await api.delete(`/users/${userToDelete}`);
-
       setUsers((prev) => prev.filter((u) => u.uid !== userToDelete));
-
       toast.success("User deleted successfully");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to delete user");
+      toast.error(err.response?.data?.error || "Failed to delete user");
+    } finally {
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
     }
-
-    setDeleteDialogOpen(false);
-    setUserToDelete(null);
   };
 
   // ==============================
@@ -111,20 +115,55 @@ export default function UserManagement() {
   };
 
   // ==============================
+  // Format Date
+  // ==============================
+  const formatDate = (dateValue) => {
+    if (!dateValue) return "N/A";
+    
+    try {
+      let date;
+      
+      if (typeof dateValue === 'number') {
+        date = new Date(dateValue);
+      } else if (typeof dateValue === 'string') {
+        date = new Date(dateValue);
+      } else if (dateValue instanceof Date) {
+        date = dateValue;
+      } else {
+        return "Invalid date";
+      }
+      
+      if (isNaN(date.getTime())) {
+        return "Invalid date";
+      }
+      
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch {
+      return String(dateValue);
+    }
+  };
+
+  // ==============================
   // Search Filter
   // ==============================
   const filteredUsers = users.filter(
     (u) =>
       u.name?.toLowerCase().includes(search.toLowerCase()) ||
-      u.email?.toLowerCase().includes(search.toLowerCase())
+      u.email?.toLowerCase().includes(search.toLowerCase()) ||
+      u.uid?.toLowerCase().includes(search.toLowerCase()) ||
+      u.role?.toLowerCase().includes(search.toLowerCase())
   );
 
   // ==============================
-  // Loading
+  // Loading State
   // ==============================
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80vh" }}>
         <CircularProgress size={60} />
       </Box>
     );
@@ -132,24 +171,35 @@ export default function UserManagement() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Delete Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Delete User</DialogTitle>
-
-        <DialogContent>
+      {/* Delete Confirmation Dialog */}
+      <Dialog 
+        open={deleteDialogOpen} 
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ bgcolor: 'error.main', color: 'white' }}>
+          Delete User
+        </DialogTitle>
+        <DialogContent sx={{ mt: 2 }}>
           <DialogContentText>
             Are you sure you want to delete this user? This action cannot be
-            undone.
+            undone and will permanently remove the user from both Authentication
+            and Database.
           </DialogContentText>
         </DialogContent>
-
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-
+        <DialogActions sx={{ p: 2 }}>
+          <Button 
+            onClick={() => setDeleteDialogOpen(false)}
+            variant="outlined"
+          >
+            Cancel
+          </Button>
           <Button
             onClick={confirmDelete}
             color="error"
             variant="contained"
+            startIcon={<DeleteIcon />}
           >
             Delete
           </Button>
@@ -167,43 +217,55 @@ export default function UserManagement() {
           gap: 2,
         }}
       >
-        <Typography variant="h5" fontWeight={600}>
+        <Typography variant="h4" fontWeight={600}>
           User Management
         </Typography>
 
         <Button
           variant="contained"
           onClick={() => navigate("/add-user")}
+          size="large"
+          sx={{ borderRadius: 2 }}
         >
-          Add User
+          Add New User
         </Button>
       </Box>
 
-      {/* Search */}
-      <TextField
-        fullWidth
-        label="Search by Name or Email"
-        size="small"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        sx={{ mb: 3, maxWidth: 500 }}
-      />
+      {/* Search and Stats */}
+      <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 3, flexWrap: "wrap" }}>
+        <TextField
+          fullWidth
+          label="Search by Name, Email, UID, or Role"
+          size="medium"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          sx={{ maxWidth: 500 }}
+          variant="outlined"
+        />
+        <Typography variant="body2" color="text.secondary">
+          Total Users: {filteredUsers.length} / {users.length}
+        </Typography>
+      </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
 
       {/* Users Table */}
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2 }}>
         <Table size={isMobile ? "small" : "medium"}>
           <TableHead>
             <TableRow sx={{ bgcolor: "primary.main" }}>
-              <TableCell sx={{ color: "white" }}>Name</TableCell>
-              <TableCell sx={{ color: "white" }}>Email</TableCell>
-              <TableCell sx={{ color: "white" }}>Role</TableCell>
-              <TableCell sx={{ color: "white" }} align="center">
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Name</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Email</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Role</TableCell>
+              {/* <TableCell sx={{ color: "white", fontWeight: "bold" }}>Email Verified</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Status</TableCell> */}
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Created</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Last Sign In</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">
                 Actions
               </TableCell>
             </TableRow>
@@ -212,30 +274,84 @@ export default function UserManagement() {
           <TableBody>
             {filteredUsers.length > 0 ? (
               filteredUsers.map((user) => (
-                <TableRow key={user.uid} hover>
-                  <TableCell>{user.name}</TableCell>
+                <TableRow 
+                  key={user.uid} 
+                  hover
+                  sx={{ 
+                    '&:last-child td, &:last-child th': { border: 0 },
+                    bgcolor: user.disabled ? 'action.disabledBackground' : 'inherit'
+                  }}
+                >
+                  <TableCell>
+                    <Typography fontWeight={500}>{user.name || "N/A"}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      ID: {user.uid.substring(0, 8)}...
+                    </Typography>
+                  </TableCell>
 
                   <TableCell>{user.email}</TableCell>
 
-                  <TableCell>{user.role}</TableCell>
+                  <TableCell>
+                    <Chip 
+                      label={user.role || "user"} 
+                      size="small"
+                      color={user.role === "admin" ? "secondary" : "default"}
+                      sx={{ fontWeight: 500 }}
+                    />
+                  </TableCell>
+
+                  {/* <TableCell>
+                    {user.emailVerified ? (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <CheckCircleIcon color="success" fontSize="small" />
+                        <Typography variant="body2">Verified</Typography>
+                      </Box>
+                    ) : (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <CancelIcon color="error" fontSize="small" />
+                        <Typography variant="body2">Unverified</Typography>
+                      </Box>
+                    )}
+                  </TableCell>
+
+                  <TableCell>
+                    <Chip 
+                      label={user.disabled ? "Disabled" : "Active"}
+                      size="small"
+                      color={user.disabled ? "error" : "success"}
+                      sx={{ fontWeight: 500 }}
+                    />
+                  </TableCell> */}
+
+                  <TableCell>{formatDate(user.createdAt)}</TableCell>
+
+                  <TableCell>
+                    {user.lastSignIn ? formatDate(user.lastSignIn) : "Never"}
+                  </TableCell>
 
                   <TableCell align="center">
                     <Tooltip title="Edit User">
                       <IconButton
                         color="primary"
                         onClick={() => handleEdit(user)}
+                        size="small"
+                        sx={{ mr: 1 }}
                       >
                         <EditIcon />
                       </IconButton>
                     </Tooltip>
 
-                    <Tooltip title="Delete User">
-                      <IconButton
-                        color="error"
-                        onClick={() => handleDelete(user.uid)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
+                    <Tooltip title={user.disabled ? "Cannot delete disabled user" : "Delete User"}>
+                      <span>
+                        <IconButton
+                          color="error"
+                          onClick={() => handleDelete(user.uid)}
+                          disabled={user.disabled}
+                          size="small"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </span>
                     </Tooltip>
                   </TableCell>
                 </TableRow>
@@ -243,11 +359,16 @@ export default function UserManagement() {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={4}
+                  colSpan={8}
                   align="center"
-                  sx={{ py: 4, color: "text.secondary" }}
+                  sx={{ py: 8 }}
                 >
-                  No users found
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    No users found
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {search ? "Try adjusting your search" : "Click 'Add New User' to create one"}
+                  </Typography>
                 </TableCell>
               </TableRow>
             )}

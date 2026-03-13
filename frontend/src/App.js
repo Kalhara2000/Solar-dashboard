@@ -11,16 +11,12 @@ import EditSolarUnit from './pages/EditSolarUnit';
 import UserManagement from './pages/UserManagement';
 import EditUser from "./pages/EditUser";
 
-// Admin-only wrapper
-function ProtectedAdmin({ children }) {
-  const userRole = localStorage.getItem('userRole');
-  if (userRole !== 'admin') {
-    // Redirect non-admin users to dashboard
-    return <Navigate to="/dashboard" replace />;
-  }
-  return children;
-}
+// Admin check function
+const isAdmin = () => {
+  return localStorage.getItem('userRole') === 'admin';
+};
 
+// Protected layout with Navbar
 function ProtectedLayout() {
   const isAuthenticated = !!localStorage.getItem('token');
 
@@ -36,6 +32,14 @@ function ProtectedLayout() {
   );
 }
 
+// Admin route wrapper
+function AdminRoute({ children }) {
+  if (!isAdmin()) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return children;
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -45,25 +49,32 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Protected Routes */}
+        {/* Protected Routes (with Navbar) */}
         <Route element={<ProtectedLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/solar-units" element={<SolarUnits />} />
           <Route path="/solar-unit/:unitId" element={<SolarUnitDashboard />} />
           <Route path="/add-solar" element={<AddSolarUnit />} />
           <Route path="/edit-solar/:unitId" element={<EditSolarUnit />} />
-
-          {/* Admin-only route */}
-          <Route
-            path="/user-management"
+          
+          {/* Admin Routes */}
+          <Route 
+            path="/user-management" 
             element={
-              <ProtectedAdmin>
+              <AdminRoute>
                 <UserManagement />
-              </ProtectedAdmin>
-            }
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/edit-user/:uid" 
+            element={
+              <AdminRoute>
+                <EditUser />
+              </AdminRoute>
+            } 
           />
         </Route>
-        <Route path="/edit-user/:uid" element={<EditUser />} />
 
         {/* Redirect unknown routes */}
         <Route path="*" element={<Navigate to="/" replace />} />

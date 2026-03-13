@@ -37,8 +37,8 @@ export default function SolarUnitDashboard() {
 
   if (!unit) return <Typography>Loading...</Typography>;
 
-  const energy = (unit.power * 24 / 1000).toFixed(2);
-  const cost = (energy * 0.19).toFixed(2);
+  // const energy = (unit.power * 24 / 1000).toFixed(2);
+  // const cost = (energy * 0.19).toFixed(2);
 
   // Gauge Card Component
   const GaugeCard = ({ title, value, max, unitLabel }) => (
@@ -62,12 +62,12 @@ export default function SolarUnitDashboard() {
   );
 
   // Normal Card Component
-  const Card = ({ title, value }) => (
-    <Paper sx={{ p: 3, textAlign: "center", borderRadius: 3 }}>
-      <Typography variant="h6">{title}</Typography>
-      <Typography variant="h4">{value}</Typography>
-    </Paper>
-  );
+  // const Card = ({ title, value }) => (
+  //   <Paper sx={{ p: 3, textAlign: "center", borderRadius: 3 }}>
+  //     <Typography variant="h6">{title}</Typography>
+  //     <Typography variant="h4">{value}</Typography>
+  //   </Paper>
+  // );
 
   return (
     <Container maxWidth="xl" sx={{ py: { xs: 3, sm: 4 } }}>
@@ -83,18 +83,36 @@ export default function SolarUnitDashboard() {
 
       <Grid container spacing={3} sx={{ p: 4 }}>
         {/* First row: Gauges */}
-        <Grid>
-          <GaugeCard title="Voltage" value={unit.voltage} max={300} unitLabel="V" />
-        </Grid>
-        <Grid>
-          <GaugeCard title="Current" value={unit.current} max={100} unitLabel="A" />
-        </Grid>
-        <Grid>
-          <GaugeCard title="Power" value={unit.power} max={5000} unitLabel="W" />
-        </Grid>
+       <Grid>
+  <GaugeCard
+    title="Voltage"
+    value={unit.voltage}
+    max={300}
+    unitLabel="V"
+    sx={{ color: 'red' }} // change text or gauge color
+  />
+</Grid>
+<Grid>
+  <GaugeCard
+    title="Current"
+    value={unit.current}
+    max={100}
+    unitLabel="A"
+    sx={{ color: 'green' }}
+  />
+</Grid>
+<Grid>
+  <GaugeCard
+    title="Power"
+    value={unit.power}
+    max={5000}
+    unitLabel="W"
+    sx={{ color: 'blue' }}
+  />
+</Grid>
 
         {/* Second row: Normal Cards + Load Switch */}
-        <Grid>
+        {/* <Grid>
           <Card title="Power Factor" value={unit.powerFactor || 0} />
         </Grid>
         <Grid>
@@ -102,7 +120,7 @@ export default function SolarUnitDashboard() {
         </Grid>
         <Grid>
           <Card title="Total Cost ($)" value={cost} />
-        </Grid>
+        </Grid> */}
 
         {/* Load Switch: full width */}
         <Grid>
