@@ -10,6 +10,8 @@ import AddSolarUnit from './pages/AddSolarUnit';
 import EditSolarUnit from './pages/EditSolarUnit';
 import UserManagement from './pages/UserManagement';
 import EditUser from "./pages/EditUser";
+import AddNewUser from "./pages/AddNewUser";
+
 
 // Admin check function
 const isAdmin = () => {
@@ -56,6 +58,12 @@ function App() {
           <Route path="/solar-unit/:unitId" element={<SolarUnitDashboard />} />
           <Route path="/add-solar" element={<AddSolarUnit />} />
           <Route path="/edit-solar/:unitId" element={<EditSolarUnit />} />
+
+
+          {/* User Management Routes */}
+          <Route path="/add-user" element={<AddNewUser />} />
+          <Route path="/edit-user/:uid" element={<EditUser />} />
+
           
           {/* Admin Routes */}
           <Route 

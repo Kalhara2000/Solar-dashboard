@@ -29,8 +29,6 @@ import {
 
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-// import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-// import CancelIcon from "@mui/icons-material/Cancel";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
@@ -64,12 +62,12 @@ export default function UserManagement() {
     try {
       setLoading(true);
       const { data } = await api.get("/users");
-      
+
       // Sort users by creation date (newest first)
       const sortedUsers = (data || []).sort((a, b) => {
         return new Date(b.createdAt) - new Date(a.createdAt);
       });
-      
+
       setUsers(sortedUsers);
       setError(null);
     } catch (err) {
@@ -119,10 +117,10 @@ export default function UserManagement() {
   // ==============================
   const formatDate = (dateValue) => {
     if (!dateValue) return "N/A";
-    
+
     try {
       let date;
-      
+
       if (typeof dateValue === 'number') {
         date = new Date(dateValue);
       } else if (typeof dateValue === 'string') {
@@ -132,11 +130,11 @@ export default function UserManagement() {
       } else {
         return "Invalid date";
       }
-      
+
       if (isNaN(date.getTime())) {
         return "Invalid date";
       }
-      
+
       return date.toLocaleDateString("en-US", {
         year: "numeric",
         month: "short",
@@ -172,8 +170,8 @@ export default function UserManagement() {
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       {/* Delete Confirmation Dialog */}
-      <Dialog 
-        open={deleteDialogOpen} 
+      <Dialog
+        open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
         maxWidth="sm"
         fullWidth
@@ -189,7 +187,7 @@ export default function UserManagement() {
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <Button 
+          <Button
             onClick={() => setDeleteDialogOpen(false)}
             variant="outlined"
           >
@@ -261,8 +259,6 @@ export default function UserManagement() {
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>Name</TableCell>
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>Email</TableCell>
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>Role</TableCell>
-              {/* <TableCell sx={{ color: "white", fontWeight: "bold" }}>Email Verified</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Status</TableCell> */}
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>Created</TableCell>
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>Last Sign In</TableCell>
               <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">
@@ -274,10 +270,10 @@ export default function UserManagement() {
           <TableBody>
             {filteredUsers.length > 0 ? (
               filteredUsers.map((user) => (
-                <TableRow 
-                  key={user.uid} 
+                <TableRow
+                  key={user.uid}
                   hover
-                  sx={{ 
+                  sx={{
                     '&:last-child td, &:last-child th': { border: 0 },
                     bgcolor: user.disabled ? 'action.disabledBackground' : 'inherit'
                   }}
@@ -292,36 +288,13 @@ export default function UserManagement() {
                   <TableCell>{user.email}</TableCell>
 
                   <TableCell>
-                    <Chip 
-                      label={user.role || "user"} 
+                    <Chip
+                      label={user.role || "user"}
                       size="small"
-                      color={user.role === "admin" ? "secondary" : "default"}
+                      color={user.role === "admin" ? "warning" : "success"}
                       sx={{ fontWeight: 500 }}
                     />
                   </TableCell>
-
-                  {/* <TableCell>
-                    {user.emailVerified ? (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <CheckCircleIcon color="success" fontSize="small" />
-                        <Typography variant="body2">Verified</Typography>
-                      </Box>
-                    ) : (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <CancelIcon color="error" fontSize="small" />
-                        <Typography variant="body2">Unverified</Typography>
-                      </Box>
-                    )}
-                  </TableCell>
-
-                  <TableCell>
-                    <Chip 
-                      label={user.disabled ? "Disabled" : "Active"}
-                      size="small"
-                      color={user.disabled ? "error" : "success"}
-                      sx={{ fontWeight: 500 }}
-                    />
-                  </TableCell> */}
 
                   <TableCell>{formatDate(user.createdAt)}</TableCell>
 

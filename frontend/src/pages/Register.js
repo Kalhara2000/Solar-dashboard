@@ -247,7 +247,6 @@ export default function Register() {
               >
                 <MenuItem value="admin">Admin</MenuItem>
                 <MenuItem value="officer">Officer</MenuItem>
-                <MenuItem value="user" disabled>User</MenuItem>
               </Select>
             </FormControl>
 
